@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>星空生日贺卡</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            cursor: pointer;
+        }
+        #canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        .card {
+            position: relative;
+            z-index: 2;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            max-width: 600px;
+            margin: 50px auto;
+            background: rgba(0,0,0,0.7);
+            border-radius: 15px;
+        }
+        h1 {
+            font-family: 'Microsoft YaHei';
+            color: #ff69b4;
+            text-shadow: 0 0 10px #ff1493;
+        }
+        .photo {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            margin: 20px auto;
+        }
+        /* 新增图片容器样式 */
+        .photo-container {
+            width: 80%;  /* 容器宽度 */
+            max-width: 400px;  /* 最大宽度 */
+            margin: 20px auto;  /* 上下边距20px，水平居中 */
+            position: relative;
+        }
+
+        /* 响应式图片样式 */
+        .responsive-img {
+            width: 100%;  /* 宽度占满容器 */
+            height: auto;  /* 高度自动保持比例 */
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border: 3px solid #fff;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .photo-container {
+                width: 90%;  /* 小屏幕时加宽容器 */
+                max-width: 300px;
+            }
+            
+            .responsive-img {
+                border-width: 2px;
+            }
+        }
+
+        /* 桌面端悬停效果 */
+        @media (hover: hover) {
+            .responsive-img {
+                transition: transform 0.3s ease;
+            }
+            .responsive-img:hover {
+                transform: scale(1.03);
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    
+    <div class="card">
+        <h1>✨ 姐姐生日快乐 ✨</h1>
+        <div class="photo-container">
+        <img 
+            src="https://kaitokid110.github.io/Birthday/cake.jpg" 
+            class="responsive-img" 
+            alt="蛋糕照片"
+            loading="lazy"  <!-- 延迟加载 -->
+    </div>
+        <p>🎂 愿你的每个愿望都如烟花般绚烂</p>
+        <p>💖 岁月静好 幸福常伴</p>
+        <p>🎉 点击星空绽放祝福烟花</p>
+    </div>
+
+    <script>
+        class StarryNight {
+            constructor() {
+                this.canvas = document.getElementById('canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.particles = [];
+                this.stars = [];
+                this.resize();
+                
+                // 初始化事件
+                window.addEventListener('resize', () => this.resize());
+                this.canvas.addEventListener('click', (e) => this.createFirework(e));
+                
+                // 创建初始星空
+                this.createStars();
+                this.animate();
+            }
+
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            createStars() {
+                for(let i=0; i<100; i++) {
+                    this.stars.push({
+                        x: Math.random() * this.canvas.width,
+                        y: Math.random() * this.canvas.height,
+                        size: Math.random() * 2,
+                        alpha: Math.random()
+                    });
+                }
+            }
+
+            createFirework(e) {
+                const colors = ['#ff3366', '#45b7d1', '#96ceb4', '#ff6b6b'];
+                for(let i=0; i<100; i++) {
+                    this.particles.push({
+                        x: e.clientX,
+                        y: e.clientY,
+                        vx: (Math.random()-0.5)*10,
+                        vy: Math.random()*-15 -5,
+                        life: 100,
+                        color: colors[Math.floor(Math.random()*colors.length)]
+                    });
+                }
+            }
+
+            drawStars() {
+                this.ctx.fillStyle = '#fff';
+                this.stars.forEach(star => {
+                    this.ctx.globalAlpha = star.alpha;
+                    this.ctx.fillRect(star.x, star.y, star.size, star.size);
+                });
+                this.ctx.globalAlpha = 1;
+            }
+
+            animate() {
+                this.ctx.fillStyle = 'rgba(0,0,0,0.2)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                this.drawStars();
+                
+                // 更新粒子
+                this.particles = this.particles.filter(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.15; // 重力
+                    p.life -= 1;
+                    
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+                    this.ctx.fill();
+                    
+                    return p.life > 0;
+                });
+
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        // 初始化系统
+        new StarryNight();
+    </script>
+</body>
+</html>
